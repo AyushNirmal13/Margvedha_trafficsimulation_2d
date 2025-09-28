@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
-YOLOv11 + BoT-SORT multi-camera traffic counter
-- Live NDJSON event logging (append during run)
-- Per-camera summary JSON updated live
-- Annotated output videos per camera
-Author: Adapted for user's project
+SIH25050: Real time Traffic Optimization System for Urban Congestion.
+Author: Team Marg Vedha 3.0
 """
 
 import argparse
@@ -52,11 +49,11 @@ class CameraProcessor:
         self.model = YOLO(self.weights)
 
         # data
-        self.track_last_side = {}  # track_id -> 'A'/'B'
+        self.track_last_side = {}
         self.counts = {'incoming': defaultdict(int), 'outgoing': defaultdict(int)}
-        self.events = []  # in-memory small buffer (also persisted live to NDJSON)
+        self.events = []  
         self.target_names = ['car', 'bus', 'truck']
-        self.class_map = {}  # idx->name
+        self.class_map = {}
         self.writer = None
         self.output_dir = output_dir
 
@@ -65,15 +62,12 @@ class CameraProcessor:
         self.summary_json = os.path.join(output_dir, f"{self.id}_summary_live.json")
         self.summary_csv = os.path.join(output_dir, f"{self.id}_events.csv")
 
-        # ensure output dir exists
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     def map_class_names(self, result):
         try:
-            # ultralytics model should provide names
             self.class_map = self.model.names if hasattr(self.model, 'names') else result.model.names
         except Exception:
-            # fallback to common COCO subset
             self.class_map = {2: 'car', 5: 'bus', 7: 'truck'}
 
     def side_label_from_signed(self, signed_value):
@@ -136,10 +130,7 @@ class CameraProcessor:
             json.dump(final, f, indent=2)
 
     def process(self, max_frames: int = None, verbose: bool = True):
-        """
-        Process the source using ultralytics model.track with BoT-SORT tracker
-        Streams results; writes events live to NDJSON and summary JSON.
-        """
+
         if verbose:
             print(f"[{self.id}] Starting. source={self.source} weights={self.weights}")
 

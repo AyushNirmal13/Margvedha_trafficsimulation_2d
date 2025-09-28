@@ -3,26 +3,26 @@
     {
       "id": "cam1_north",
       "name": "Camera 1 - North",
-      "source": "E:\\SIH\\Development\\YOLOv11\\data\\cam1.mp4",
-      "weights": "E:\\SIH\\Development\\YOLOv11\\yolov11m.pt",
-      "split_line": [640, 0, 640, 720],
+      "source": "E:\\SIH\\Development\\Authority-Dashboard\\MargVedhaMain\\Backend-YOLOv11\\data\\cam1.mp4",
+      "weights": "weights/yolov11m.pt",
+      "split_line": [0, 360, 1280, 360],
       "frame_scale": 1.0,
       "out_video": "cam1_north_out.mp4"
     },
     {
       "id": "cam2_south",
       "name": "Camera 2 - South",
-      "source": "E:\\SIH\\Development\\YOLOv11\\data\\cam2.mp4",
-      "weights": "E:\\SIH\\Development\\YOLOv11\\yolov11m.pt",
-      "split_line": [640, 0, 640, 720],
+      "source": "E:\\SIH\\Development\\Authority-Dashboard\\MargVedhaMain\\Backend-YOLOv11\\data\\cam2.mp4",
+      "weights": "weights/yolov11m.pt",
+      "split_line": [0, 360, 1280, 360],
       "frame_scale": 1.0,
       "out_video": "cam2_south_out.mp4"
     },
     {
       "id": "cam3_east",
       "name": "Camera 3 - East",
-      "source": "E:\\SIH\\Development\\YOLOv11\\data\\cam3.mp4",
-      "weights": "E:\\SIH\\Development\\YOLOv11\\yolov11m.pt",
+      "source": "E:\\SIH\\Development\\Authority-Dashboard\\MargVedhaMain\\Backend-YOLOv11\\data\\cam3.mp4",
+      "weights": "weights/yolov11m.pt",
       "split_line": [0, 360, 1280, 360],
       "frame_scale": 1.0,
       "out_video": "cam3_east_out.mp4"
@@ -30,8 +30,8 @@
     {
       "id": "cam4_west",
       "name": "Camera 4 - West",
-      "source": "E:\\SIH\\Development\\YOLOv11\\data\\cam4.mp4",
-      "weights": "E:\\SIH\\Development\\YOLOv11\\yolov11m.pt",
+      "source": "E:\\SIH\\Development\\Authority-Dashboard\\MargVedhaMain\\Backend-YOLOv11\\data\\cam4.mp4",
+      "weights": "weights/yolov11m.pt",
       "split_line": [0, 360, 1280, 360],
       "frame_scale": 1.0,
       "out_video": "cam4_west_out.mp4"

@@ -1,2 +1,0 @@
-frame,timestamp,timestamp_human,track_id,class,direction,centroid,confidence,camera_id,camera_name
-209,1758447904.2030377,2025-09-21 15:15:04.203,78,car,incoming,"[638.8157348632812, 271.4227294921875]",0.18103206157684326,cam2_south,Camera 2 - South
