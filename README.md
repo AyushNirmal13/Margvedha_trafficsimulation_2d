@@ -31,6 +31,17 @@ We built an **AI-powered modular platform** for **real-time traffic optimization
 
 ---
 
+## 🗺️ Live 2D Traffic Monitoring Map (Nashik)
+We have integrated a real-time, interactive **2D Traffic Monitoring Map** powered by Leaflet. This dashboard feature provides a bird's-eye view of traffic density across 80 active camera feeds in the Nashik area.
+
+- **Dynamic Markers:** Custom UI box indicators visualizing live vehicle counts for Cars (🚗), Bikes (🏍️), and Buses (🚌).
+- **Camera Selection Dropdown:** Instantly search and fly to any of the 80 camera locations across the city.
+- **Live State Updates:** View real-time simulated traffic density and active congestion alerts natively on the map.
+
+![Live 2D Traffic Map](2dmap.png)
+
+---
+
 ## 🛠️ Tech Stack  
 
 **Core AI/ML:**  
