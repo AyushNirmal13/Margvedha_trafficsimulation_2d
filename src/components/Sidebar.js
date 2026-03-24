@@ -22,6 +22,11 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/2d-map" className="sidebar-link">
+            <FaMapMarkerAlt className="sidebar-icon" /> 2D Traffic Map
+          </Link>
+        </li>
+        <li>
           <Link to="/traffic-alerts" className="sidebar-link">
             <FaBell className="sidebar-icon" /> Traffic Alerts
           </Link>

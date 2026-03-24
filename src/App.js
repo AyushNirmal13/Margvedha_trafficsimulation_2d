@@ -14,7 +14,7 @@ import BusRouteOptimization from "./pages/BusRouteOptimization";
 import BlockChainTicketing from "./pages/BlockChainTicketing";
 import AutoFareAdjustments from "./pages/AutoFareAdjustments";
 import Home from "./pages/Home";
-
+import TrafficMonitoringMap from "./pages/TrafficMonitoringMap";
 function App() {
   const isAuthenticated = true; // <--- Bypass login by hardcoding to true
 
@@ -34,6 +34,7 @@ function App() {
 
           {/* All other routes are accessible since we are always "logged in" */}
           <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
+          <Route path="/2d-map" element={<TrafficMonitoringMap />} />
           <Route path="/google-map" element={<MapLocation />} />
           <Route path="/camera-feeds" element={<CameraFeeds />} />
           <Route path="/traffic-alerts" element={<Alerts />} />

@@ -10,6 +10,7 @@ import math
 import os
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple
@@ -19,6 +20,33 @@ import numpy as np
 import pandas as pd
 from ultralytics import YOLO
 from tqdm import tqdm
+
+try:
+    import requests as _requests
+    _REQUESTS_OK = True
+except ImportError:
+    _REQUESTS_OK = False
+
+# Flask API endpoint — set via --api-url arg or env variable
+FLASK_API_URL = os.environ.get("MARGVEDHA_API_URL", "http://localhost:5001")
+
+def push_result_to_api(result: Dict, api_url: str = FLASK_API_URL):
+    """Push final camera count result to Flask API after processing."""
+    if not _REQUESTS_OK or not api_url:
+        return
+    payload = {
+        "camera_id":   result.get("camera_id"),
+        "camera_name": result.get("camera_id"),  # name same as id if not set
+        "type":        "real",
+        "timestamp":   time.time(),
+        "timestamp_human": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "counts":      result.get("counts", {})
+    }
+    try:
+        resp = _requests.post(f"{api_url}/submit_count", json=payload, timeout=5)
+        print(f"[API] Pushed {result.get('camera_id')} → {resp.status_code}")
+    except Exception as e:
+        print(f"[API] Push failed for {result.get('camera_id')}: {e}")
 
 # ---------- Utilities ----------
 def now_epoch():
@@ -292,25 +320,60 @@ def load_config(path):
     with open(path, 'r') as f:
         return json.load(f)
 
-def main(config_path, output_dir, sequential: bool = True, max_frames: int = None):
+def _run_camera(cam, output_dir, max_frames, api_url):
+    """Worker function for a single real camera — runs in its own thread."""
+    proc = CameraProcessor(cam, output_dir=output_dir)
+    res = proc.process(max_frames=max_frames, verbose=True)
+    if res:
+        # Set proper camera name from config
+        res["camera_name"] = cam.get("name", res["camera_id"])
+        push_result_to_api(res, api_url)
+    return res
+
+
+def main(config_path, output_dir, max_frames: int = None, api_url: str = FLASK_API_URL, max_workers: int = 4):
     cfg = load_config(config_path)
-    cameras = cfg.get('cameras', [])
+    # Only process cameras marked as 'real' (or without a type field)
+    all_cameras = cfg.get('cameras', [])
+    real_cameras = [c for c in all_cameras if c.get('type', 'real') == 'real']
+
+    print(f"[Main] Found {len(real_cameras)} real cameras. Running up to {max_workers} in parallel.")
     results = []
-    for cam in cameras:
-        proc = CameraProcessor(cam, output_dir=output_dir)
-        res = proc.process(max_frames=max_frames, verbose=True)
-        results.append(res)
-    # aggregate
-    agg = {r['camera_id']: r['counts'] for r in results}
+
+    # ── Parallel execution with ThreadPoolExecutor ───────────────────────────
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_run_camera, cam, output_dir, max_frames, api_url): cam
+            for cam in real_cameras
+        }
+        for future in as_completed(futures):
+            cam = futures[future]
+            try:
+                res = future.result()
+                if res:
+                    results.append(res)
+            except Exception as e:
+                print(f"[Main] Camera {cam.get('id')} failed: {e}")
+
+    # Aggregate all real camera results
+    agg = {r['camera_id']: r['counts'] for r in results if r}
     agg_path = os.path.join(output_dir, "aggregate_counts_live.json")
     with open(agg_path, 'w') as f:
         json.dump(agg, f, indent=2)
-    print(f"All cameras processed. Aggregate saved to {agg_path}")
+    print(f"[Main] All real cameras processed. Aggregate saved to {agg_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YOLOv11 + BoT-SORT traffic counting (live JSON)")
-    parser.add_argument('--config', required=True, help='Path to cameras_config.json')
-    parser.add_argument('--out', default='outputs', help='Output directory for videos and logs')
-    parser.add_argument('--max-frames', type=int, default=None, help='For dev: stop after N frames per camera')
+    parser.add_argument('--config',      required=True,                    help='Path to cameras_config.json')
+    parser.add_argument('--out',         default='outputs',                help='Output directory')
+    parser.add_argument('--max-frames',  type=int,   default=None,         help='Dev: stop after N frames per camera')
+    parser.add_argument('--max-workers', type=int,   default=4,            help='Max parallel camera threads (default: 4)')
+    parser.add_argument('--api-url',     default=FLASK_API_URL,            help='Flask API URL to push results')
     args = parser.parse_args()
-    main(args.config, args.out)
+    main(
+        config_path=args.config,
+        output_dir=args.out,
+        max_frames=args.max_frames,
+        api_url=args.api_url,
+        max_workers=args.max_workers
+    )
